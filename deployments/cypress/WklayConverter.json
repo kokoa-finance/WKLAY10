@@ -1,0 +1,99 @@
+{
+  "address": "0xBCf786f9B92E8AF57621bF357e991F2aFD2cCbdD",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "wklay9_",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "wklay10_",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "value",
+          "type": "uint256"
+        }
+      ],
+      "name": "wklay10ToWklay9",
+      "outputs": [],
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "value",
+          "type": "uint256"
+        }
+      ],
+      "name": "wklay9ToWklay10",
+      "outputs": [],
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "stateMutability": "payable",
+      "type": "receive"
+    }
+  ],
+  "transactionHash": "0x1639aa39320160ae70fb2f84ccd12b7a2a9b9817dfdba2c8ca815130fa0ad6f2",
+  "receipt": {
+    "to": null,
+    "from": "0x276199434a04b2607D5E95670e5cB6a7E7f10f3d",
+    "contractAddress": "0xBCf786f9B92E8AF57621bF357e991F2aFD2cCbdD",
+    "transactionIndex": 6,
+    "gasUsed": "399487",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "blockHash": "0xb8b302314b2bd5c2d56e918f89304fb6baab44da7568aeea08cf2076bc419dce",
+    "transactionHash": "0x1639aa39320160ae70fb2f84ccd12b7a2a9b9817dfdba2c8ca815130fa0ad6f2",
+    "logs": [],
+    "blockNumber": 84695359,
+    "cumulativeGasUsed": null,
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [
+    "0xe4f05A66Ec68B54A58B17c22107b02e0232cC817",
+    "0x0246fEd501Ae1e800b394A821E7A5e99f6886B24"
+  ],
+  "solcInputHash": "61183f0b73cbed17659aa81a96235799",
+  "metadata": "{\"compiler\":{\"version\":\"0.7.6+commit.7338295f\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"wklay9_\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"wklay10_\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"}],\"name\":\"wklay10ToWklay9\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"}],\"name\":\"wklay9ToWklay10\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"stateMutability\":\"payable\",\"type\":\"receive\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/WklayConverter.sol\":\"WklayConverter\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":20000},\"remappings\":[]},\"sources\":{\"contracts/WklayConverter.sol\":{\"content\":\"// SPDX-License-Identifier: GPL-3.0-or-later\\n// Copyright (C) 2015, 2016, 2017 Dapphub\\n// Adapted by Ethereum Community 2021\\npragma solidity 0.7.6;\\n\\ninterface WKLAY9Like {\\n    function withdraw(uint) external;\\n    function deposit() external payable;\\n    function transfer(address, uint) external returns (bool);\\n    function transferFrom(address, address, uint) external returns (bool);\\n}\\n\\ninterface WKLAY10Like {\\n    function depositTo(address) external payable;\\n    function withdrawFrom(address, address, uint256) external;\\n}\\n\\ncontract WklayConverter {\\n    WKLAY9Like private immutable wklay9; // claimaswap wklay\\n    WKLAY10Like private immutable wklay10; // wklay v10\\n\\n    constructor(address wklay9_, address wklay10_) {\\n        wklay9 = WKLAY9Like(wklay9_);\\n        wklay10 = WKLAY10Like(wklay10_);\\n    }\\n    \\n    receive() external payable {}\\n\\n    function wklay9ToWklay10(address account, uint256 value) external payable {\\n        wklay9.transferFrom(account, address(this), value);\\n        wklay9.withdraw(value);\\n        wklay10.depositTo{value: value + msg.value}(account);\\n    }\\n\\n    function wklay10ToWklay9(address account, uint256 value) external payable {\\n        wklay10.withdrawFrom(account, address(this), value);\\n        uint256 combined = value + msg.value;\\n        wklay9.deposit{value: combined}();\\n        wklay9.transfer(account, combined);\\n    }\\n}\",\"keccak256\":\"0x4739ad7435d0a349e094bfe3670a4b2ccc5df7b1539418840932d62eddae02f6\",\"license\":\"GPL-3.0-or-later\"}},\"version\":1}",
+  "bytecode": "0x60c060405234801561001057600080fd5b506040516105ae3803806105ae8339818101604052604081101561003357600080fd5b5080516020909101516001600160601b0319606092831b8116608052911b1660a05260805160601c60a05160601c61051d6100916000398060af528061044152508061017d52806101fe52806102c052806103e0525061051d6000f3fe60806040526004361061002d5760003560e01c806354cdf55714610039578063705df7c81461007457610034565b3661003457005b600080fd5b6100726004803603604081101561004f57600080fd5b5073ffffffffffffffffffffffffffffffffffffffff81351690602001356100ad565b005b6100726004803603604081101561008a57600080fd5b5073ffffffffffffffffffffffffffffffffffffffff81351690602001356102be565b7f000000000000000000000000000000000000000000000000000000000000000073ffffffffffffffffffffffffffffffffffffffff16639555a9428330846040518463ffffffff1660e01b8152600401808473ffffffffffffffffffffffffffffffffffffffff1681526020018373ffffffffffffffffffffffffffffffffffffffff1681526020018281526020019350505050600060405180830381600087803b15801561015c57600080fd5b505af1158015610170573d6000803e3d6000fd5b50505050600034820190507f000000000000000000000000000000000000000000000000000000000000000073ffffffffffffffffffffffffffffffffffffffff1663d0e30db0826040518263ffffffff1660e01b81526004016000604051808303818588803b1580156101e357600080fd5b505af11580156101f7573d6000803e3d6000fd5b50505050507f000000000000000000000000000000000000000000000000000000000000000073ffffffffffffffffffffffffffffffffffffffff1663a9059cbb84836040518363ffffffff1660e01b8152600401808373ffffffffffffffffffffffffffffffffffffffff16815260200182815260200192505050602060405180830381600087803b15801561028d57600080fd5b505af11580156102a1573d6000803e3d6000fd5b505050506040513d60208110156102b757600080fd5b5050505050565b7f000000000000000000000000000000000000000000000000000000000000000073ffffffffffffffffffffffffffffffffffffffff166323b872dd8330846040518463ffffffff1660e01b8152600401808473ffffffffffffffffffffffffffffffffffffffff1681526020018373ffffffffffffffffffffffffffffffffffffffff1681526020018281526020019350505050602060405180830381600087803b15801561036d57600080fd5b505af1158015610381573d6000803e3d6000fd5b505050506040513d602081101561039757600080fd5b5050604080517f2e1a7d4d00000000000000000000000000000000000000000000000000000000815260048101839052905173ffffffffffffffffffffffffffffffffffffffff7f00000000000000000000000000000000000000000000000000000000000000001691632e1a7d4d91602480830192600092919082900301818387803b15801561042757600080fd5b505af115801561043b573d6000803e3d6000fd5b505050507f000000000000000000000000000000000000000000000000000000000000000073ffffffffffffffffffffffffffffffffffffffff1663b760faf9348301846040518363ffffffff1660e01b8152600401808273ffffffffffffffffffffffffffffffffffffffff1681526020019150506000604051808303818588803b1580156104ca57600080fd5b505af11580156104de573d6000803e3d6000fd5b5050505050505056fea264697066735822122085a3000a35399d988c087f56495bf03b6f093dab0cc67de37cb2ef2c26d06ffd64736f6c63430007060033",
+  "deployedBytecode": "0x60806040526004361061002d5760003560e01c806354cdf55714610039578063705df7c81461007457610034565b3661003457005b600080fd5b6100726004803603604081101561004f57600080fd5b5073ffffffffffffffffffffffffffffffffffffffff81351690602001356100ad565b005b6100726004803603604081101561008a57600080fd5b5073ffffffffffffffffffffffffffffffffffffffff81351690602001356102be565b7f000000000000000000000000000000000000000000000000000000000000000073ffffffffffffffffffffffffffffffffffffffff16639555a9428330846040518463ffffffff1660e01b8152600401808473ffffffffffffffffffffffffffffffffffffffff1681526020018373ffffffffffffffffffffffffffffffffffffffff1681526020018281526020019350505050600060405180830381600087803b15801561015c57600080fd5b505af1158015610170573d6000803e3d6000fd5b50505050600034820190507f000000000000000000000000000000000000000000000000000000000000000073ffffffffffffffffffffffffffffffffffffffff1663d0e30db0826040518263ffffffff1660e01b81526004016000604051808303818588803b1580156101e357600080fd5b505af11580156101f7573d6000803e3d6000fd5b50505050507f000000000000000000000000000000000000000000000000000000000000000073ffffffffffffffffffffffffffffffffffffffff1663a9059cbb84836040518363ffffffff1660e01b8152600401808373ffffffffffffffffffffffffffffffffffffffff16815260200182815260200192505050602060405180830381600087803b15801561028d57600080fd5b505af11580156102a1573d6000803e3d6000fd5b505050506040513d60208110156102b757600080fd5b5050505050565b7f000000000000000000000000000000000000000000000000000000000000000073ffffffffffffffffffffffffffffffffffffffff166323b872dd8330846040518463ffffffff1660e01b8152600401808473ffffffffffffffffffffffffffffffffffffffff1681526020018373ffffffffffffffffffffffffffffffffffffffff1681526020018281526020019350505050602060405180830381600087803b15801561036d57600080fd5b505af1158015610381573d6000803e3d6000fd5b505050506040513d602081101561039757600080fd5b5050604080517f2e1a7d4d00000000000000000000000000000000000000000000000000000000815260048101839052905173ffffffffffffffffffffffffffffffffffffffff7f00000000000000000000000000000000000000000000000000000000000000001691632e1a7d4d91602480830192600092919082900301818387803b15801561042757600080fd5b505af115801561043b573d6000803e3d6000fd5b505050507f000000000000000000000000000000000000000000000000000000000000000073ffffffffffffffffffffffffffffffffffffffff1663b760faf9348301846040518363ffffffff1660e01b8152600401808273ffffffffffffffffffffffffffffffffffffffff1681526020019150506000604051808303818588803b1580156104ca57600080fd5b505af11580156104de573d6000803e3d6000fd5b5050505050505056fea264697066735822122085a3000a35399d988c087f56495bf03b6f093dab0cc67de37cb2ef2c26d06ffd64736f6c63430007060033",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [],
+    "types": null
+  }
+}

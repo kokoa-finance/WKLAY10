@@ -1,0 +1,37 @@
+{
+  "language": "Solidity",
+  "sources": {
+    "contracts/WklayConverter.sol": {
+      "content": "// SPDX-License-Identifier: GPL-3.0-or-later\n// Copyright (C) 2015, 2016, 2017 Dapphub\n// Adapted by Ethereum Community 2021\npragma solidity 0.7.6;\n\ninterface WKLAY9Like {\n    function withdraw(uint) external;\n    function deposit() external payable;\n    function transfer(address, uint) external returns (bool);\n    function transferFrom(address, address, uint) external returns (bool);\n}\n\ninterface WKLAY10Like {\n    function depositTo(address) external payable;\n    function withdrawFrom(address, address, uint256) external;\n}\n\ncontract WklayConverter {\n    WKLAY9Like private immutable wklay9; // claimaswap wklay\n    WKLAY10Like private immutable wklay10; // wklay v10\n\n    constructor(address wklay9_, address wklay10_) {\n        wklay9 = WKLAY9Like(wklay9_);\n        wklay10 = WKLAY10Like(wklay10_);\n    }\n    \n    receive() external payable {}\n\n    function wklay9ToWklay10(address account, uint256 value) external payable {\n        wklay9.transferFrom(account, address(this), value);\n        wklay9.withdraw(value);\n        wklay10.depositTo{value: value + msg.value}(account);\n    }\n\n    function wklay10ToWklay9(address account, uint256 value) external payable {\n        wklay10.withdrawFrom(account, address(this), value);\n        uint256 combined = value + msg.value;\n        wklay9.deposit{value: combined}();\n        wklay9.transfer(account, combined);\n    }\n}"
+    }
+  },
+  "settings": {
+    "optimizer": {
+      "enabled": true,
+      "runs": 20000
+    },
+    "outputSelection": {
+      "*": {
+        "*": [
+          "abi",
+          "evm.bytecode",
+          "evm.deployedBytecode",
+          "evm.methodIdentifiers",
+          "metadata",
+          "devdoc",
+          "userdoc",
+          "storageLayout",
+          "evm.gasEstimates",
+          "devdoc",
+          "userdoc"
+        ],
+        "": [
+          "ast"
+        ]
+      }
+    },
+    "metadata": {
+      "useLiteralContent": true
+    }
+  }
+}
